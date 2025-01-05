@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Redirect after audio ends
     audio.addEventListener("ended", () => {
         console.log("Audio ended. Redirecting...");
-        window.location.href = "index2.html"; // Replace with your greeting card URL
+        window.location.href = "home.html"; // Replace with your greeting card URL
     });
 
     // Simulate loading and show the main content
