@@ -5,7 +5,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(to bottom, #ff9966, #ff5e62);
+    background: linear-gradient(to bottom, #9b4dca, #6a2e92)
     color: white;
     overflow: hidden;
     transition: background 1s ease;
