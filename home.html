@@ -12,6 +12,27 @@
     <link rel="icon" href="index2/assets/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="index2/style.css">
     <link rel="stylesheet" href="index2/assets/css/animate.css">
+    <style>
+        /* Snowflake animation */
+        .snowflake {
+            position: fixed;
+            top: -50px;
+            color: white;
+            font-size: 20px;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-50px);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -38,10 +59,60 @@
         </div>
     </div>
 
+    <audio id="background-music" src="index2/assets/bgmusic.mp3"></audio>
+
     <script src="index2/assets/js/vanilla-tilt.js"></script>
     <script src="index2/assets/js/wow.min.js"></script>
     <script>
         new WOW().init();
+
+        // Add a touch or click event to play music
+        document.body.addEventListener('touchstart', playMusic, { once: true });
+        document.body.addEventListener('click', playMusic, { once: true });
+
+        function playMusic() {
+            const audio = document.getElementById('background-music');
+            audio.volume = 0; // Start volume at 0
+            audio.play().catch(error => console.error('Playback error:', error));
+
+            // Volume fade-in effect
+            let volume = 0;
+            const fadeIn = setInterval(() => {
+                if (volume < 1) {
+                    volume += 0.01; // Increment volume
+                    audio.volume = Math.min(volume, 1); // Ensure it doesn't exceed 1
+                } else {
+                    clearInterval(fadeIn); // Stop fade-in when full volume is reached
+                }
+            }, 50);
+
+            // Seamless replay without volume change
+            audio.addEventListener('ended', () => {
+                audio.currentTime = 0; // Reset to the beginning
+                audio.volume = 1; // Ensure volume stays at max after fade-in
+                audio.play(); // Replay seamlessly
+            });
+
+            // Start snowfall
+            createSnowfall();
+        }
+
+        // Create snowfall animation
+        function createSnowfall() {
+            for (let i = 0; i < 100; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                snowflake.style.left = Math.random() * 100 + 'vw';
+                snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
+                snowflake.innerText = '❄'; // Snowflake symbol
+                document.body.appendChild(snowflake);
+
+                // Remove snowflake after animation
+                snowflake.addEventListener('animationend', () => {
+                    snowflake.remove();
+                });
+            }
+        }
     </script>
 </body>
 
