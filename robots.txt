@@ -2,4 +2,3 @@ User-agent: *
 Allow: /index.html
 Allow: /password.html
 Allow: /weather.html
-Disallow: /home.html
