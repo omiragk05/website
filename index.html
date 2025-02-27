@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Omira's Website!</title>
+    <meta name="description" content="Welcome to Omira Geevin's personal website. Get ready to explore!">
+    <meta name="keywords" content="Omira geevin, omiragk ,personal website, social media links, cute, blue theme">
+    <meta name="author" content="Omira Geevin">
+	<link rel="icon" href="index/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index/style.css">
+</head>
+<body>
+    <!-- Loading Page -->
+    <div id="loading-page">
+        <div class="loader-container">
+            <div class="loader"></div>
+            <div class="loader-face">
+    <img src="https://avatars.githubusercontent.com/u/92523621?v=4" alt="Profile" id="loader-face-img">
+</div>
+        </div>
+        <p id="loading-text">Loading...</p>
+        <div id="message">Click To Launch The Website</div>
+        <button id="play-button">Launch</button>
+    </div>
+
+    <!-- Main Content (Hidden initially) -->
+    <div id="main-content">
+        <!-- Background elements will be added with JavaScript -->
+        
+        <div class="container">
+            <div class="card" id="profile-card">
+                <div class="profile-container">
+                    <div class="profile-decoration"></div>
+                    <img src="https://avatars.githubusercontent.com/u/92523621?v=4" alt="Profile Avatar" class="profile-pic">
+                </div>
+                <h1></h1>
+                <p class="bio">Hello! Welcome to my Website!</p>
+                
+                <div class="links">
+                    <a href="https://twitter.com/omiragk" aria-label="Twitter Profile">
+                        <img src="https://cdn-icons-png.flaticon.com/512/124/124021.png" alt="Twitter" class="social-icon">
+                    </a>
+                    <a href="https://t.me/Omiragk" aria-label="Telegram Profile">
+                        <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram" class="social-icon">
+                    </a>
+                    <a href="https://github.com/omiragk05" aria-label="GitHub Profile">
+                        <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" class="social-icon">
+                    </a>
+                    <a href="https://www.instagram.com/omiragk05" aria-label="Instagram Profile">
+                        <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" class="social-icon">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="launch-sound">
+        <source src="index/patiyo.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="background-music" loop>
+        <source src="index/bgmusic.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="index/script.js"></script>
+</body>
+</html>
