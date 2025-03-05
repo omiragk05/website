@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Stream Player</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js" crossorigin="anonymous"></script> 
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --accent-color: #1DB954;
+            --accent-hover: #1ED760;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Spotify', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .content-wrapper {
+            width: 450px;
+            padding: 0 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .player {
+            background-color: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .thumbnail {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 20px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .thumbnail.rotating img {
+            animation: rotate 15s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #trackTitle {
+            text-align: center;
+            font-size: 1.4rem;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        button {
+            background-color: transparent;
+            border: none;
+            color: var(--text-secondary);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        #playPauseBtn {
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
+            width: 65px;
+            height: 65px;
+            box-shadow: 0 8px 20px rgba(29,185,84,0.4);
+        }
+
+        #playPauseBtn:hover {
+            background-color: var(--accent-hover);
+            transform: scale(1.05);
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .volume-control input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            background: var(--text-secondary);
+            outline: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            border-radius: 5px;
+        }
+
+        .volume-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            background: var(--accent-color);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .now-playing {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .playlist-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+
+        .playlist-btn:hover {
+            background-color: rgba(255,255,255,0.2);
+            color: var(--text-primary);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            z-index: 90;
+            display: none;
+        }
+
+        .playlist-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 400px;
+            max-height: 70vh;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            z-index: 100;
+            padding: 20px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+            display: none;
+            opacity: 0;
+            overflow-y: auto;
+        }
+
+        .playlist-panel.show {
+            display: block;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .playlist-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .close-playlist {
+            background: none;
+            color: var(--text-secondary);
+            width: auto;
+            height: auto;
+        }
+
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .playlist-item:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+
+        .playlist-item.active {
+            background-color: rgba(29,185,84,0.2);
+        }
+
+        .playlist-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .playlist-item-title {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <h1>Simple Music Player</h1>
+        <div id="player" class="player">
+            <!-- Playlist button (right side) -->
+            <button class="control-btn playlist-btn" onclick="togglePlaylist()">
+                <i class="fas fa-list"></i> Playlist
+            </button>
+
+            <!-- Thumbnail image for the current track -->
+            <div id="thumbnailContainer" class="thumbnail">
+                <img id="thumbnail" src="https://streamurl.link/images/broadcasts/9bc7046.webp" alt="Thumbnail">
+            </div>
+            <h3 id="trackTitle">Fun Kids</h3>
+            
+            <!-- Now playing indicator -->
+            <div id="nowPlaying" class="now-playing hidden">
+                <i class="fas fa-broadcast-tower"></i> Now Playing
+            </div>
+            
+            <div class="controls">
+                <!-- Button for previous track -->
+                <button onclick="previousTrack()"><i class="fas fa-step-backward"></i></button>
+                <!-- Button for play/pause -->
+                <button id="playPauseBtn" onclick="togglePlayPause()"><i class="fas fa-play"></i></button>
+                <!-- Button for next track -->
+                <button onclick="nextTrack()"><i class="fas fa-step-forward"></i></button>
+            </div>
+            <div class="volume-control">
+                <!-- Volume icon that toggles mute -->
+                <i id="volumeIcon" class="fas fa-volume-up" onclick="toggleMute()"></i>
+                <!-- Volume slider -->
+                <input id="volume" type="range" min="0" max="1" step="0.01" value="0.7" onchange="setVolume(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- Dark overlay for the playlist -->
+    <div class="overlay" id="overlay" onclick="togglePlaylist()"></div>
+    
+    <!-- Playlist panel (will be shown when playlist button is clicked) -->
+    <div class="playlist-panel" id="playlistPanel">
+        <div class="playlist-header">
+            <h2>Your Streams</h2>
+            <button class="close-playlist" onclick="togglePlaylist()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="playlistItems">
+            <!-- Playlist items will be generated here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Array to store track information: title, source URL, and thumbnail image
+        const tracks = [
+            {
+                title: "Fun Kids",
+                src: "https://listen-funkids.sharp-stream.com/funkids.mp3",
+                thumbnail: "https://streamurl.link/images/broadcasts/9bc7046.webp"
+            },
+            {
+                title: "Hip Hop and Soul",
+                src: "http://stream.rtlradio.de/rnb/mp3-192/",
+                thumbnail: "https://streamurl.link/images/broadcasts/6765ae0.webp"
+            },
+            {
+                title: "Neue Hits",
+                src: "http://stream.rtlradio.de/neuehits/mp3-192/",
+                thumbnail: "https://streamurl.link/images/broadcasts/63417bb.webp"
+            },
+            {
+                title: "90s90s In The Mix",
+                src: "https://streams.90s90s.de/inthemix/mp3-192/",
+                thumbnail: "https://streamurl.link/images/broadcasts/e623724.webp"
+            },
+        ];
+
+        let currentTrackIndex = 0; // Index of the currently playing track
+        const player = new Audio(); // Create an audio object
+        player.src = tracks[currentTrackIndex].src; // Set the initial track source
+        player.preload = "auto"; // Preload the audio for smooth playback
+        player.volume = 0.7; // Set initial volume
+        
+        // DOM Elements
+        const playerElement = document.getElementById('player');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const thumbnail = document.getElementById('thumbnail');
+        const thumbnailContainer = document.getElementById('thumbnailContainer');
+        const trackTitle = document.getElementById('trackTitle');
+        const volumeIcon = document.getElementById('volumeIcon');
+        const playlistPanel = document.getElementById('playlistPanel');
+        const overlay = document.getElementById('overlay');
+        const playlistItems = document.getElementById('playlistItems');
+        const nowPlaying = document.getElementById('nowPlaying');
+        const volumeSlider = document.getElementById('volume');
+
+        // Function to update track information when changing tracks
+        function updateTrackInfo() {
+            trackTitle.textContent = tracks[currentTrackIndex].title;
+            thumbnail.src = tracks[currentTrackIndex].thumbnail;
+            player.src = tracks[currentTrackIndex].src; // Update audio source
+            
+            // Start playing the new track
+            player.play() 
+                .then(() => {
+                    // Play succeeded
+                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>'; // Change button to pause icon
+                    thumbnailContainer.classList.add('rotating'); // Start thumbnail rotation
+                    nowPlaying.classList.remove('hidden'); // Show "Now Playing" indicator
+                })
+                .catch(error => {
+                    // Play failed
+                    console.error("Playback failed:", error);
+                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    thumbnailContainer.classList.remove('rotating'); // Stop thumbnail rotation
+                    nowPlaying.classList.add('hidden'); // Hide "Now Playing" indicator
+                });
+                
+            // Update active class in playlist
+            updateActivePlaylistItem();
+        }
+
+        // Function to toggle between play and pause
+        function togglePlayPause() {
+            if (player.paused) {
+                player.play()
+                    .then(() => {
+                        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                        thumbnailContainer.classList.add('rotating'); // Start thumbnail rotation
+                        nowPlaying.classList.remove('hidden'); // Show "Now Playing" indicator
+                    })
+                    .catch(error => {
+                        console.error("Playback failed:", error);
+                    });
+            } else {
+                player.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                thumbnailContainer.classList.remove('rotating'); // Stop thumbnail rotation
+                nowPlaying.classList.add('hidden'); // Hide "Now Playing" indicator
+            }
+        }
+
+        // Function to go to the next track
+        function nextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % tracks.length; // Loop back to the first track after the last one
+            updateTrackInfo();
+        }
+
+        // Function to go to the previous track
+        function previousTrack() {
+            currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length; // Loop back to the last track from the first one
+            updateTrackInfo();
+        }
+
+        // Function to adjust volume
+        function setVolume(volume) {
+            player.volume = volume;
+            // Update volume icon based on volume level
+            updateVolumeIcon(volume);
+        }
+
+        // Function to update volume icon based on volume level
+        function updateVolumeIcon(volume) {
+            volumeIcon.className = ''; // Clear existing classes
+            
+            if (player.muted) {
+                volumeIcon.className = 'fas fa-volume-mute';
+            } else if (volume > 0.7) {
+                volumeIcon.className = 'fas fa-volume-up';
+            } else if (volume > 0.3) {
+                volumeIcon.className = 'fas fa-volume-down';
+            } else if (volume > 0) {
+                volumeIcon.className = 'fas fa-volume-off';
+            } else {
+                volumeIcon.className = 'fas fa-volume-mute';
+            }
+        }
+
+        // Function to toggle mute
+        function toggleMute() {
+            player.muted = !player.muted;
+            
+            if (player.muted) {
+                volumeIcon.className = 'fas fa-volume-mute';
+            } else {
+                updateVolumeIcon(player.volume);
+            }
+        }
+
+        // Function to toggle playlist panel
+        function togglePlaylist() {
+            playlistPanel.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        // Function to create playlist items
+        function createPlaylistItems() {
+            playlistItems.innerHTML = ''; // Clear existing items
+            
+            tracks.forEach((track, index) => {
+                const item = document.createElement('div');
+                item.className = 'playlist-item' + (index === currentTrackIndex ? ' active' : '');
+                item.setAttribute('data-index', index);
+                
+                item.innerHTML = `
+                    <img src="${track.thumbnail}" alt="${track.title}">
+                    <div class="playlist-item-info">
+                        <div class="playlist-item-title">${track.title}</div>
+                    </div>
+                `;
+                
+                item.addEventListener('click', function() {
+                    currentTrackIndex = parseInt(this.getAttribute('data-index'));
+                    updateTrackInfo();
+                    togglePlaylist(); // Close playlist after selection
+                });
+                
+                playlistItems.appendChild(item);
+            });
+        }
+
+        // Function to update active playlist item
+        function updateActivePlaylistItem() {
+            const items = document.querySelectorAll('.playlist-item');
+            items.forEach((item, index) => {
+                if (index === currentTrackIndex) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // Event listener for when track ends
+        player.addEventListener('ended', function() {
+            nextTrack(); // Play the next track when current one ends
+        });
+
+        // Initialize
+        createPlaylistItems(); // Create playlist items
+        volumeSlider.value = player.volume; // Set initial volume slider position
+        
+        // Wait for page to load completely before initializing
+        window.addEventListener('load', function() {
+            // Set initial states
+            if (!player.paused) {
+                thumbnailContainer.classList.add('rotating');
+                nowPlaying.classList.remove('hidden');
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            }
+        });
+    </script>
+</body>
+</html>
